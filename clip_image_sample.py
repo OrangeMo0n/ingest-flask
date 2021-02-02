@@ -10,6 +10,11 @@ def clip_thread(**kwargs):
     if cmdStatus != 0:
         print(f"Do cmd failed: {cmd}")
         return
+    
+    auxXmlFile = kwargs.get("aux.xml", None)
+    if auxXmlFile:
+        if os.path.exists(auxXmlFile):
+            os.remove(auxXmlFile)
 
 def clip_image_sample(imagePath, imageId, outDir,\
      sampleWidth, sampleHeight, sampleExtension):
@@ -21,7 +26,7 @@ def clip_image_sample(imagePath, imageId, outDir,\
         return responseJson
 
     if not os.path.exists(outDir):
-        os.mkdir(outDir)
+        os.makedirs(outDir)
 
     try:
         dataset = gdal.Open(imagePath)
@@ -42,7 +47,7 @@ def clip_image_sample(imagePath, imageId, outDir,\
 
         xSampleCount = int((imageWidth-1)/sampleWidth + 1)
         ySampleCount = int((imageHeight-1)/sampleHeight + 1)
-        max_workers = 20
+        max_workers = 5
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for yIndex in range(ySampleCount):
                 yStart = yIndex * sampleHeight
@@ -59,7 +64,8 @@ def clip_image_sample(imagePath, imageId, outDir,\
                     clipCmd = "gdal_translate " + imagePath + " " + outputSample + \
                         bandOption + srcWinOption
                     kwargs = {
-                        "cmd": clipCmd
+                        "cmd": clipCmd,
+                        "aux.xml": outputSample + ".aux.xml"
                     }
                     executor.submit(clip_thread, **kwargs)
 

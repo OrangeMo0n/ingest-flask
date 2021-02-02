@@ -15,6 +15,17 @@ def image_base_info(imagePath):
         imageWidth = imageDataset.RasterXSize
         imageHeight = imageDataset.RasterYSize
         bandCount = imageDataset.RasterCount
+        
+        imageWkt = None
+        imageSpatialRef = imageDataset.GetSpatialRef()
+        if imageSpatialRef:
+            imageWkt = imageSpatialRef.ExportToWkt()
+        
+        imageGeotransform = imageDataset.GetGeoTransform()
+        xImageRes = imageGeotransform[1]
+        yImageRes = abs(imageGeotransform[5])
+        nodataValue = imageDataset.GetRasterBand(1).GetNoDataValue()
+
         bandDataType = imageDataset.GetRasterBand(1).DataType
         dataTypeName = gdal.GetDataTypeName(bandDataType)
         interleaveName = ""
@@ -37,7 +48,11 @@ def image_base_info(imagePath):
             "height": imageHeight,
             "bandCount": bandCount,
             "bandDataType": dataTypeName,
-            "interleave": interleaveName
+            "interleave": interleaveName,
+            "wkt": imageWkt,
+            "xRes": xImageRes,
+            "yRes": yImageRes,
+            "nodata": nodataValue
         }
         print("imageInfo:", imageInfo)
 
@@ -51,3 +66,6 @@ def image_base_info(imagePath):
     responseJson["msg"] = "操作成功"
     responseJson["data"] = imageInfo
     return responseJson
+
+if __name__ == "__main__":
+    image_base_info("F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\GF2_PMS1__L1A0000564539-MSS1.tif")

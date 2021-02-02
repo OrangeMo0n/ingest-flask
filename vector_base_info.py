@@ -42,3 +42,6 @@ def vector_base_info(vectorPath):
         return responseJson
     
     return responseJson
+
+if __name__ == "__main__":
+    vector_base_info("C:\\Users\\Administrator\\Desktop\\clip.json")
