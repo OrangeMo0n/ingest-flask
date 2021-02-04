@@ -11,6 +11,11 @@ def clip_thread(**kwargs):
         print(f"Do cmd failed: {cmd}")
         return
     
+    thumbCmd = kwargs.get("thumb_cmd", None)
+    if thumbCmd:
+        if os.system(thumbCmd) != 0:
+            print("Do create thumb file failed:", thumbCmd)
+
     auxXmlFile = kwargs.get("aux.xml", None)
     if auxXmlFile:
         if os.path.exists(auxXmlFile):
@@ -47,7 +52,7 @@ def clip_image_sample(imagePath, imageId, outDir,\
 
         xSampleCount = int((imageWidth-1)/sampleWidth + 1)
         ySampleCount = int((imageHeight-1)/sampleHeight + 1)
-        max_workers = 5
+        max_workers = 15
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for yIndex in range(ySampleCount):
                 yStart = yIndex * sampleHeight
@@ -63,9 +68,15 @@ def clip_image_sample(imagePath, imageId, outDir,\
                     srcWinOption = f" -srcwin {xStart} {yStart} {sampleWidth} {sampleHeight} "
                     clipCmd = "gdal_translate " + imagePath + " " + outputSample + \
                         bandOption + srcWinOption
+                    
+                    sampleThumb = os.path.join(outDir, \
+                        str(imageId)+"_"+sampleIndex+"_thumb"+sampleExtension)
+                    thumbCmd = "gdal_translate " + outputSample + " " + sampleThumb + \
+                        " -outsize 256 256"
                     kwargs = {
                         "cmd": clipCmd,
-                        "aux.xml": outputSample + ".aux.xml"
+                        "aux.xml": outputSample + ".aux.xml",
+                        "thumb_cmd": thumbCmd
                     }
                     executor.submit(clip_thread, **kwargs)
 
@@ -91,5 +102,10 @@ def clip_image_sample(imagePath, imageId, outDir,\
     return responseJson
 
 if __name__ == "__main__":
-    clip_image_sample("F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\GF2_PMS1__L1A0000564539-MSS1.tif", 00,\
-        "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\samples", 1024, 1024, ".jpg")
+    clip_image_sample(
+        "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\GF2_PMS1__L1A0000564539-MSS1.tif", 
+        564539,\
+        "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\samples",
+        1024,
+        1024,
+        ".tif")

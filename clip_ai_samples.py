@@ -1,7 +1,7 @@
+import os, shutil, random
 from osgeo import gdal
-import os, shutil
-import random
 from clip_image_sample import clip_image_sample
+from image_base_info import image_base_info
 
 def clip_ai_samples(imageFile1, imageFile2, labelFile, imageId, outDir,\
     sampleWidth, sampleHeight, sampleExtension, trainValidRate):
@@ -56,23 +56,74 @@ def clip_ai_samples(imageFile1, imageFile2, labelFile, imageId, outDir,\
     
     sampleCount = image1ClipResponseJson['data']['sampleCount']
     validSampleCount = int(sampleCount*(1-trainValidRate))
+    if validSampleCount < 1:
+        validSampleCount = 1
+    
+    firstClipSampleImage = str(imageId) + "_0" + sampleExtension
+    firstClipSampleImage = os.path.join(imageFile1TraningDir, firstClipSampleImage)
+    clipSampleInfo = image_base_info(firstClipSampleImage)
+    clipSampleInfo = clipSampleInfo["data"]
+    clipSampleInfo.pop("image")
+    if not imageFile2:
+        clipSampleInfo["srcImage"] = imageFile1      
+        clipSampleInfo["/train/images"] = imageFile1TraningDir
+        clipSampleInfo["/valid/images"] = imageFile1ValidDir
+    else:
+        clipSampleInfo["srcImage1"] = imageFile1
+        clipSampleInfo["srcImage2"] = imageFile2
+        clipSampleInfo["/train/A"] = imageFile1TraningDir
+        clipSampleInfo["/train/B"] = imageFile2TraningDir
+        clipSampleInfo["/valid/A"] = imageFile1ValidDir
+        clipSampleInfo["/valid/B"] = imageFile2ValidDir
+
+    clipSampleInfo["srcLabel"] = labelFile  
+    clipSampleInfo["/valid/labels"] = labelValidDir
+    clipSampleInfo["/train/labels"] = labelTraningDir
+    clipSampleInfo["sampleCount"] = sampleCount
+    clipSampleInfo["trainValidRate"] = trainValidRate
+    
     validIndexList = random.sample(range(0, sampleCount+1), validSampleCount)
     for validIndexValue in validIndexList:
         imageValidFile = str(imageId)+"_"+str(validIndexValue)+sampleExtension
+        thumbValidFile = str(imageId) + "_" + str(validIndexValue) + sampleExtension
+
         image1SrcFile = os.path.join(imageFile1TraningDir, imageValidFile)
         image1DstFile = os.path.join(imageFile1ValidDir, imageValidFile)
-        shutil.move(image1SrcFile, image1DstFile) 
+        shutil.move(image1SrcFile, image1DstFile)
+
+        image1SrcThumb = os.path.join(imageFile1TraningDir, thumbValidFile)
+        if os.path.exists(image1SrcThumb):
+            image1DstThumb = os.path.join(imageFile1ValidDir, thumbValidFile)
+            shutil.move(image1SrcThumb, image1DstThumb)
 
         if image2DirName:
             image2SrcFile = os.path.join(imageFile2TraningDir, imageValidFile)
             image2DstFile = os.path.join(imageFile2ValidDir, imageValidFile)
             shutil.move(image2SrcFile, image2DstFile)
+
+            image2SrcThumb = os.path.join(imageFile2TraningDir, thumbValidFile)
+            if os.path.exists(image2SrcThumb):
+                image2DstThumb = os.path.join(imageFile2ValidDir, thumbValidFile)
+                shutil.move(image2SrcThumb, image2DstThumb)
         
         labelSrcFile = os.path.join(labelTraningDir, imageValidFile)
         labelDstFile = os.path.join(labelValidDir, imageValidFile)
         shutil.move(labelSrcFile, labelDstFile)
 
+        labelSrcThumb = os.path.join(labelTraningDir, thumbValidFile)
+        if os.path.exists(labelSrcThumb):
+            labelDstThumb = os.path.join(labelValidDir, thumbValidFile)
+            shutil.move(labelSrcThumb, labelDstThumb)
+    
+    responseJson["code"] = 200
+    responseJson["msg"] = "Image and label clip success!"
+    responseJson["data"] = clipSampleInfo
+    print(responseJson)
+
+    return responseJson
+
 if __name__ == "__main__":
+    '''
     clip_ai_samples("F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\GF2_PMS1__L1A0000564539-MSS1.tif",
         None,
         "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\labels\\GF2_PMS1__L1A0000564539-MSS1_label.tif",
@@ -80,5 +131,15 @@ if __name__ == "__main__":
         "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\samples",
         1024,
         1024,
-        ".jpg",
+        ".tif",
+        0.8)
+    '''
+    clip_ai_samples("/data/pie_data/wuhan_pie_ai/test_clip/GF2_PMS1__L1A0001015649-MSS1.tif",
+        None,
+        "/data/pie_data/wuhan_pie_ai/test_clip/GF2_PMS1__L1A0001015649-MSS1_label.tif",
+        1015649,
+        "/data/pie_data/wuhan_pie_ai/test_clip/1015649",
+        1024,
+        1024,
+        ".tif",
         0.8)
