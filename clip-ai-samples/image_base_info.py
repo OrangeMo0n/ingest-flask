@@ -68,4 +68,4 @@ def image_base_info(imagePath):
     return responseJson
 
 if __name__ == "__main__":
-    image_base_info("F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\rgb\\GF2_PMS1__L1A0000564539-MSS1.tif")
+    image_base_info("F:\\Data\\PIE-AI样本训练平台数据集\\SECOND_train_set\\train\\A\\00003.png")

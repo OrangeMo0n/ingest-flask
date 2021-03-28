@@ -82,10 +82,10 @@ def clip_ai_samples(imageFile1, imageFile2, labelFile, imageId, outDir,\
     clipSampleInfo["sampleCount"] = sampleCount
     clipSampleInfo["trainValidRate"] = trainValidRate
     
-    validIndexList = random.sample(range(0, sampleCount+1), validSampleCount)
+    validIndexList = random.sample(range(0, sampleCount), validSampleCount)
     for validIndexValue in validIndexList:
-        imageValidFile = str(imageId)+"_"+str(validIndexValue)+sampleExtension
-        thumbValidFile = str(imageId) + "_" + str(validIndexValue) + sampleExtension
+        imageValidFile = str(imageId) + "_" + str(validIndexValue) + sampleExtension
+        thumbValidFile = str(imageId) + "_" + str(validIndexValue) + "_thumb" + sampleExtension
 
         image1SrcFile = os.path.join(imageFile1TraningDir, imageValidFile)
         image1DstFile = os.path.join(imageFile1ValidDir, imageValidFile)

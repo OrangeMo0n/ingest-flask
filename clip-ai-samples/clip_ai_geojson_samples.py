@@ -371,7 +371,6 @@ def clip_ai_geojson_samples(geoJsonPath, imagePath, imageId, outDir, isProj,\
             if os.path.exists(geoJsonPath.replace(".shp", ".shx")):
                 os.remove(geoJsonPath.replace(".shp", ".shx"))
     except Exception as e:
-        print("Catch exception, error is {}".format(e))
         print('traceback.format_exc():\n%s' % traceback.format_exc())
         responseJson["code"] = 500
         responseJson["msg"] = "Get exception when clip geojson sample: {}".format(e)

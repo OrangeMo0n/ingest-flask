@@ -52,7 +52,7 @@ def clip_image_sample(imagePath, imageId, outDir,\
 
         xSampleCount = int((imageWidth-1)/sampleWidth + 1)
         ySampleCount = int((imageHeight-1)/sampleHeight + 1)
-        max_workers = 15
+        max_workers = 10
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for yIndex in range(ySampleCount):
                 yStart = yIndex * sampleHeight

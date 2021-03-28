@@ -2,14 +2,14 @@ import json
 from clip_ai_samples import clip_ai_samples
 
 if __name__ == "__main__":
-    '''
-    config_path = "F:\\Data\\PIE-AI样本训练平台数据集\\武大GID\\large-scale\\clip_sample.json"
+    
+    config_path = "/data/pie_data/test_data/GID/clip_sample2.json"
     with open(config_path, 'r', encoding='utf-8') as f:
         params = json.load(f)
-    '''
+    
 
-    config = input()
-    params = json.load(config)
+    # config = input()
+    # params = json.loads(config)
 
     srcImage1List = params["srcImage1"]
     srcImage2List = params["srcImage2"]
